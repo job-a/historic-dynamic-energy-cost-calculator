@@ -1,4 +1,4 @@
-package org.energy.pricing.importer
+package org.energy.pricing.io
 
 import kotlinx.browser.document
 import org.w3c.dom.HTMLInputElement

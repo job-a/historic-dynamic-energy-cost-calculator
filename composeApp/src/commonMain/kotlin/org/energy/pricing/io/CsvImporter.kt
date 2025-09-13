@@ -1,4 +1,4 @@
-package org.energy.pricing.importer
+package org.energy.pricing.io
 
 import org.energy.pricing.data.ImportRecord
 
