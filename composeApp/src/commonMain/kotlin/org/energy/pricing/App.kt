@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import org.energy.pricing.data.InMemoryStore
 import org.energy.pricing.importer.parseCsvForImport
 import org.energy.pricing.importer.pickCsvFileContent
+import org.energy.pricing.services.DateTimeService
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -58,9 +59,9 @@ private fun PowerImportScreen() {
         val preview = InMemoryStore.records.take(10)
         for (r in preview) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(r.date_time, modifier = Modifier.weight(1f))
-                Text(r.power_import.toString(), modifier = Modifier.weight(1f))
-                Text(r.actual_usage?.toString() ?: "", modifier = Modifier.weight(1f))
+                Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
+                Text("${r.power_import} kWh", modifier = Modifier.weight(1f))
+                Text(r.actual_usage?.let { "$it kWh" } ?: "", modifier = Modifier.weight(1f))
             }
         }
     }
