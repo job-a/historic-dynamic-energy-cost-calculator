@@ -56,6 +56,7 @@ fun App() {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("date_time", modifier = Modifier.weight(1f))
                     Text("power_import", modifier = Modifier.weight(1f))
+                    Text("actual_usage", modifier = Modifier.weight(1f))
                 }
                 // Show up to first 10 rows
                 val preview = InMemoryStore.records.take(10)
@@ -63,6 +64,7 @@ fun App() {
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(r.date_time, modifier = Modifier.weight(1f))
                         Text(r.power_import.toString(), modifier = Modifier.weight(1f))
+                        Text(r.actual_usage?.toString() ?: "", modifier = Modifier.weight(1f))
                     }
                 }
             }
