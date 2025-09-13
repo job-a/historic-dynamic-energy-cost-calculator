@@ -90,7 +90,7 @@ private fun PowerImportScreen() {
             Button(onClick = { if (currentPage > 0) currentPage -= 1 }, enabled = currentPage > 0) {
                 Text("Previous")
             }
-            Text("Page ${'$'}{currentPage + 1} of ${'$'}totalPages  (showing ${'$'}{startIndex + 1}–${'$'}endIndexExclusive of ${'$'}count)",
+            Text("Page ${currentPage + 1} of $totalPages  (showing ${startIndex + 1}–$endIndexExclusive of $count)",
                 modifier = Modifier.weight(1f))
             Button(onClick = { if (currentPage < totalPages - 1) currentPage += 1 }, enabled = currentPage < totalPages - 1) {
                 Text("Next")
@@ -154,7 +154,7 @@ private fun PowerExportScreen() {
             Button(onClick = { if (currentPage > 0) currentPage -= 1 }, enabled = currentPage > 0) {
                 Text("Previous")
             }
-            Text("Page ${'$'}{currentPage + 1} of ${'$'}totalPages  (showing ${'$'}{startIndex + 1}–${'$'}endIndexExclusive of ${'$'}count)",
+            Text("Page ${currentPage + 1} of $totalPages  (showing ${startIndex + 1}–$endIndexExclusive of $count)",
                 modifier = Modifier.weight(1f))
             Button(onClick = { if (currentPage < totalPages - 1) currentPage += 1 }, enabled = currentPage < totalPages - 1) {
                 Text("Next")
