@@ -43,3 +43,19 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
 If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+
+## Where to put common resource files?
+
+In this Kotlin Multiplatform + Compose project, place resources as follows:
+
+- Common (shared across all targets):
+  - composeApp/src/commonMain/resources
+    - Use this for generic files bundled for every platform (for example: CSV/XML data samples, configuration JSON, etc.).
+  - composeApp/src/commonMain/composeResources
+    - Use this for Compose Multiplatform resource-managed assets (images, strings, etc.). This project already contains drawable/compose-multiplatform.xml here.
+
+- Platform-specific (only for one target):
+  - composeApp/src/jvmMain/resources for Desktop/JVM-only resources.
+  - composeApp/src/wasmJsMain/resources for Web/Wasm-only resources (this project already uses it for index.html, styles.css, and data files).
+
+Rule of thumb: If a resource should be available on every platform, prefer composeApp/src/commonMain/resources (or composeResources for Compose assets). If it’s only for one platform, put it under that platform’s ...Main/resources.
