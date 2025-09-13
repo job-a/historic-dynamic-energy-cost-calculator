@@ -22,6 +22,25 @@ in your IDE’s toolbar or run it directly from the terminal:
   .\gradlew.bat :composeApp:run
   ```
 
+#### Run with Hot Reload (Desktop)
+This project applies the Compose Hot Reload Gradle plugin (org.jetbrains.compose.hot-reload). Use the following task to run the desktop app with hot reload so UI changes are applied instantly without restarting the app.
+
+- on macOS/Linux
+  ```shell
+  ./gradlew :composeApp:hotRunJvm --mainClass=org.energy.pricing.MainKt
+  ```
+- on Windows
+  ```shell
+  .\gradlew.bat :composeApp:hotRunJvm --mainClass=org.energy.pricing.MainKt
+  ```
+
+Notes:
+- The `runWithHotReload` task does not exist. Use `hotRunJvm` (or the deprecated alias `jvmRunHot`).
+- If Gradle tasks aren’t visible, re-import/sync the Gradle project in your IDE to pick up the plugin.
+- Hot reload applies to changes in Compose code. Changes to Gradle build scripts or resources like icons may still trigger a short restart.
+- You can also use IntelliJ IDEA’s Live Edit for Compose Multiplatform (2024.3+). Start the app normally, then enable Live Edit from the Run toolbar lightning icon. This provides near-instant updates as you edit composables.
+- Advanced: There’s also `:composeApp:hotDevJvm` which runs a dev entrypoint; it requires `--className` and `--funName` arguments.
+
 ### Build and Run Web Application
 
 To build and run the development version of the web app, use the run configuration from the run widget
