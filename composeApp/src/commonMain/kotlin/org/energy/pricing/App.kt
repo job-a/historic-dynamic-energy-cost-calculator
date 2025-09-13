@@ -19,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import org.energy.pricing.data.InMemoryStore
 import org.energy.pricing.io.parseCsvForImport
 import org.energy.pricing.io.pickCsvFileContent
@@ -102,7 +104,7 @@ fun App() {
     MaterialTheme {
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(Color(0xFFFAFAFA))
                 .safeContentPadding()
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -110,12 +112,12 @@ fun App() {
             // Top bar with tabs
             var selectedTab by remember { mutableStateOf(0) }
             val tabs = listOf("Power import", "Settings")
-            TabRow(selectedTabIndex = selectedTab) {
+            TabRow(selectedTabIndex = selectedTab, containerColor = Color(0xFFE7F2FF)) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
-                        text = { Text(title) }
+                        text = { Text(title, color = Color.Black, fontWeight = FontWeight.Bold) }
                     )
                 }
             }
