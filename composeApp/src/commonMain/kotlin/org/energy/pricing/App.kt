@@ -28,6 +28,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 private fun PowerImportScreen() {
+    // Pagination state
+    var currentPage by remember { mutableStateOf(0) }
+    val pageSize = 30
+
     // CSV Upload Section
     Text("CSV Import", style = MaterialTheme.typography.titleMedium)
     Row {
@@ -37,18 +41,30 @@ private fun PowerImportScreen() {
                     val parsed = parseCsvForImport(content)
                     InMemoryStore.clear()
                     InMemoryStore.addAll(parsed)
+                    currentPage = 0 // reset to first page after load
                 }
             }
         }) {
             Text("Upload CSV…")
         }
-        Button(onClick = { InMemoryStore.clear() }) {
+        Button(onClick = {
+            InMemoryStore.clear()
+            currentPage = 0
+        }) {
             Text("Clear")
         }
     }
     val count = InMemoryStore.records.size
     Text("Rows loaded: $count")
     if (count > 0) {
+        // pagination calculations
+        val totalPages = (count + pageSize - 1) / pageSize
+        if (currentPage >= totalPages) {
+            currentPage = (totalPages - 1).coerceAtLeast(0)
+        }
+        val startIndex = currentPage * pageSize
+        val endIndexExclusive = (startIndex + pageSize).coerceAtMost(count)
+
         Divider()
         // Simple header
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -56,13 +72,25 @@ private fun PowerImportScreen() {
             Text("power_import", modifier = Modifier.weight(1f))
             Text("actual_usage", modifier = Modifier.weight(1f))
         }
-        // Show up to first 10 rows
-        val preview = InMemoryStore.records.take(10)
-        for (r in preview) {
+        // Show current page rows (30 per page)
+        val pageItems = InMemoryStore.records.subList(startIndex, endIndexExclusive)
+        for (r in pageItems) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.power_importMilli), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.actual_usageMilli), modifier = Modifier.weight(1f))
+            }
+        }
+        // Pagination controls
+        Divider()
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = { if (currentPage > 0) currentPage -= 1 }, enabled = currentPage > 0) {
+                Text("Previous")
+            }
+            Text("Page ${currentPage + 1} of $totalPages  (showing ${startIndex + 1}–$endIndexExclusive of $count)",
+                modifier = Modifier.weight(1f))
+            Button(onClick = { if (currentPage < totalPages - 1) currentPage += 1 }, enabled = currentPage < totalPages - 1) {
+                Text("Next")
             }
         }
     }
