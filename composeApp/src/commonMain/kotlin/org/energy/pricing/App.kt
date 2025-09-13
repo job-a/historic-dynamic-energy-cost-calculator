@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import org.energy.pricing.data.InMemoryStore
+import org.energy.pricing.data.InMemoryExportStore
 import org.energy.pricing.io.parseCsvForImport
 import org.energy.pricing.io.pickCsvFileContent
 import org.energy.pricing.services.DateTimeService
@@ -89,7 +90,71 @@ private fun PowerImportScreen() {
             Button(onClick = { if (currentPage > 0) currentPage -= 1 }, enabled = currentPage > 0) {
                 Text("Previous")
             }
-            Text("Page ${currentPage + 1} of $totalPages  (showing ${startIndex + 1}–$endIndexExclusive of $count)",
+            Text("Page ${'$'}{currentPage + 1} of ${'$'}totalPages  (showing ${'$'}{startIndex + 1}–${'$'}endIndexExclusive of ${'$'}count)",
+                modifier = Modifier.weight(1f))
+            Button(onClick = { if (currentPage < totalPages - 1) currentPage += 1 }, enabled = currentPage < totalPages - 1) {
+                Text("Next")
+            }
+        }
+    }
+}
+
+@Composable
+private fun PowerExportScreen() {
+    var currentPage by remember { mutableStateOf(0) }
+    val pageSize = 30
+
+    Text("CSV Export", style = MaterialTheme.typography.titleMedium)
+    Row {
+        Button(onClick = {
+            pickCsvFileContent { content ->
+                if (content != null) {
+                    val parsed = parseCsvForImport(content)
+                    InMemoryExportStore.clear()
+                    InMemoryExportStore.addAll(parsed)
+                    currentPage = 0
+                }
+            }
+        }) {
+            Text("Upload CSV…")
+        }
+        Button(onClick = {
+            InMemoryExportStore.clear()
+            currentPage = 0
+        }) {
+            Text("Clear")
+        }
+    }
+    val count = InMemoryExportStore.records.size
+    Text("Rows loaded: $count")
+    if (count > 0) {
+        val totalPages = (count + pageSize - 1) / pageSize
+        if (currentPage >= totalPages) {
+            currentPage = (totalPages - 1).coerceAtLeast(0)
+        }
+        val startIndex = currentPage * pageSize
+        val endIndexExclusive = (startIndex + pageSize).coerceAtMost(count)
+
+        Divider()
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("date_time", modifier = Modifier.weight(1f))
+            Text("power_export", modifier = Modifier.weight(1f))
+            Text("actual_export", modifier = Modifier.weight(1f))
+        }
+        val pageItems = InMemoryExportStore.records.subList(startIndex, endIndexExclusive)
+        for (r in pageItems) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
+                Text(NumberService.formatKwh(r.power_importMilli), modifier = Modifier.weight(1f))
+                Text(NumberService.formatKwh(r.actual_usageMilli), modifier = Modifier.weight(1f))
+            }
+        }
+        Divider()
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = { if (currentPage > 0) currentPage -= 1 }, enabled = currentPage > 0) {
+                Text("Previous")
+            }
+            Text("Page ${'$'}{currentPage + 1} of ${'$'}totalPages  (showing ${'$'}{startIndex + 1}–${'$'}endIndexExclusive of ${'$'}count)",
                 modifier = Modifier.weight(1f))
             Button(onClick = { if (currentPage < totalPages - 1) currentPage += 1 }, enabled = currentPage < totalPages - 1) {
                 Text("Next")
@@ -111,7 +176,7 @@ fun App() {
         ) {
             // Top bar with tabs
             var selectedTab by remember { mutableStateOf(0) }
-            val tabs = listOf("Power import", "Settings")
+            val tabs = listOf("Power import", "Power export")
             TabRow(selectedTabIndex = selectedTab, containerColor = Color(0xFFE7F2FF)) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -124,7 +189,8 @@ fun App() {
             Divider()
             when (selectedTab) {
                 0 -> PowerImportScreen()
-                else -> Text("Coming soon…")
+                1 -> PowerExportScreen()
+                else -> PowerImportScreen()
             }
         }
     }
