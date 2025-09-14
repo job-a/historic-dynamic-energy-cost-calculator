@@ -58,7 +58,7 @@ internal fun EnergyPricesScreen() {
         Divider()
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("date_time", modifier = Modifier.weight(1f))
-            Text("price_in_milli_cents_per_kwh", modifier = Modifier.weight(1f))
+            Text("price in cents/kWh", modifier = Modifier.weight(1f))
         }
         val pageItems = EnergyPriceInMemoryStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
@@ -87,10 +87,18 @@ internal fun EnergyPricesScreen() {
 }
 
 private fun formatMilliCents(milliCents: Int): String {
+    // Convert thousandths of a cent to cents with up to 3 decimals
     val negative = milliCents < 0
     val abs = kotlin.math.abs(milliCents)
-    val euros = abs / 100_000
-    val rem = abs % 100_000
-    val s = euros.toString() + "." + rem.toString().padStart(5, '0')
-    return if (negative) "-$s" else s
+    val wholeCents = abs / 1000
+    val remMilli = abs % 1000
+    var s = if (remMilli == 0) {
+        wholeCents.toString()
+    } else {
+        // Always produce 3 decimals then trim trailing zeros
+        val frac = remMilli.toString().padStart(3, '0').trimEnd('0')
+        if (frac.isEmpty()) wholeCents.toString() else wholeCents.toString() + "." + frac
+    }
+    if (negative) s = "-" + s
+    return s
 }
