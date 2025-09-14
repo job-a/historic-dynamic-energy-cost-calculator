@@ -228,17 +228,18 @@ fun App() {
 @Composable
 private fun HistoricDynamicPriceScreen() {
     // Build quick lookup maps
-    val priceByInstant = remember(EnergyPriceInMemoryStore.records.size) {
+    // Use snapshot of the list as remember key so recalculation happens even if list size stays the same
+    val priceByInstant = remember(EnergyPriceInMemoryStore.records.toList()) {
         EnergyPriceInMemoryStore.records.associate { it.date_time to it.price_in_milli_cents_per_kwh }
     }
-    val importTotalMicroCents = remember(InMemoryImportStore.records.size, EnergyPriceInMemoryStore.records.size) {
+    val importTotalMicroCents = remember(InMemoryImportStore.records.toList(), EnergyPriceInMemoryStore.records.toList()) {
         calcTotalMicroCents(InMemoryImportStore.records.mapNotNull { r ->
             val usage = r.actual_usageMilli ?: return@mapNotNull null
             val price = priceByInstant[r.date_time] ?: return@mapNotNull null
             1L * usage * price
         })
     }
-    val exportTotalMicroCents = remember(InMemoryExportStore.records.size, EnergyPriceInMemoryStore.records.size) {
+    val exportTotalMicroCents = remember(InMemoryExportStore.records.toList(), EnergyPriceInMemoryStore.records.toList()) {
         calcTotalMicroCents(InMemoryExportStore.records.mapNotNull { r ->
             val usage = r.actual_usageMilli ?: return@mapNotNull null
             val price = priceByInstant[r.date_time] ?: return@mapNotNull null
