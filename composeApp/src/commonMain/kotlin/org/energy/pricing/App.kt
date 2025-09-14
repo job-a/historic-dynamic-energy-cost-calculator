@@ -84,6 +84,13 @@ private fun PowerImportScreen() {
                 Text(NumberService.formatKwh(r.actual_usageMilli), modifier = Modifier.weight(1f))
             }
         }
+        // Totals row (sum of all actual usage values across all rows)
+        val totalActualUsageMilli = InMemoryStore.records.sumOf { it.actual_usageMilli ?: 0 }
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
+            Text("Total: " + NumberService.formatKwh(totalActualUsageMilli), modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+        }
         // Pagination controls
         Divider()
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -157,6 +164,13 @@ private fun PowerExportScreen() {
                 Text(NumberService.formatKwh(r.power_importMilli), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.actual_usageMilli), modifier = Modifier.weight(1f))
             }
+        }
+        // Totals row (sum of all actual export values across all rows)
+        val totalActualExportMilli = InMemoryExportStore.records.sumOf { it.actual_usageMilli ?: 0 }
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
+            Text("Total: " + NumberService.formatKwh(totalActualExportMilli), modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
         }
         Divider()
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
