@@ -14,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
-import org.energy.pricing.data.EnergyPriceDiagnosticsStore
 import org.energy.pricing.data.EnergyPriceInMemoryStore
 import org.energy.pricing.services.DateTimeService
 import org.energy.pricing.services.EnergyPriceLoader
@@ -28,24 +27,11 @@ internal fun EnergyPricesScreen() {
     Text("Energy prices from resources", style = MaterialTheme.typography.titleMedium)
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Button(onClick = { scope.launch { EnergyPriceLoader.reload() } }) { Text("Reload prices") }
-        Button(onClick = { EnergyPriceDiagnosticsStore.clear() }) { Text("Clear diagnostics") }
     }
 
     val count = EnergyPriceInMemoryStore.records.size
     Text("Rows loaded: $count")
 
-    // Diagnostics section (always visible to offer hints)
-    Divider()
-    Text("Loader diagnostics:", style = MaterialTheme.typography.titleSmall)
-    Column {
-        if (EnergyPriceDiagnosticsStore.messages.isEmpty()) {
-            Text("(no diagnostics yet)")
-        } else {
-            EnergyPriceDiagnosticsStore.messages.forEach { msg ->
-                Text(msg)
-            }
-        }
-    }
 
     if (count > 0) {
         val totalPages = (count + pageSize - 1) / pageSize
