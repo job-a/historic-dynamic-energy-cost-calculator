@@ -14,7 +14,7 @@ data class ImportRecord(
 )
 
 // Simple in-memory table that is observable by Compose
-object InMemoryStore {
+object InMemoryImportStore {
     val records = mutableStateListOf<ImportRecord>()
 
     fun clear() = records.clear()

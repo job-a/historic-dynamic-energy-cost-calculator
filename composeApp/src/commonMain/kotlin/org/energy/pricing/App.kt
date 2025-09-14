@@ -12,7 +12,7 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.ExperimentalComposeUiApi
 import org.energy.pricing.data.InMemoryExportStore
-import org.energy.pricing.data.InMemoryStore
+import org.energy.pricing.data.InMemoryImportStore
 import org.energy.pricing.io.parseCsvForImport
 import org.energy.pricing.io.pickCsvFileContent
 import org.energy.pricing.services.DateTimeService
@@ -34,8 +34,8 @@ private fun PowerImportScreen() {
             pickCsvFileContent { content ->
                 if (content != null) {
                     val parsed = parseCsvForImport(content)
-                    InMemoryStore.clear()
-                    InMemoryStore.addAll(parsed)
+                    InMemoryImportStore.clear()
+                    InMemoryImportStore.addAll(parsed)
                     currentPage = 0 // reset to first page after load
                 }
             }
@@ -43,13 +43,13 @@ private fun PowerImportScreen() {
             Text("Upload CSV…")
         }
         Button(onClick = {
-            InMemoryStore.clear()
+            InMemoryImportStore.clear()
             currentPage = 0
         }) {
             Text("Clear")
         }
     }
-    val count = InMemoryStore.records.size
+    val count = InMemoryImportStore.records.size
     Text("Rows loaded: $count")
     if (count > 0) {
         // pagination calculations
@@ -68,7 +68,7 @@ private fun PowerImportScreen() {
             Text("actual_usage", modifier = Modifier.weight(1f))
         }
         // Show current page rows (30 per page)
-        val pageItems = InMemoryStore.records.subList(startIndex, endIndexExclusive)
+        val pageItems = InMemoryImportStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
             var hovered by remember { mutableStateOf(false) }
             Row(
@@ -85,7 +85,7 @@ private fun PowerImportScreen() {
             }
         }
         // Totals row (sum of all actual usage values across all rows)
-        val totalActualUsageMilli = InMemoryStore.records.sumOf { it.actual_usageMilli ?: 0 }
+        val totalActualUsageMilli = InMemoryImportStore.records.sumOf { it.actual_usageMilli ?: 0 }
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.weight(1f))
