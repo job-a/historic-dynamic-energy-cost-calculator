@@ -1,31 +1,19 @@
 package org.energy.pricing
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import org.energy.pricing.data.InMemoryStore
 import org.energy.pricing.data.InMemoryExportStore
+import org.energy.pricing.data.InMemoryStore
 import org.energy.pricing.io.parseCsvForImport
 import org.energy.pricing.io.pickCsvFileContent
 import org.energy.pricing.services.DateTimeService
+import org.energy.pricing.services.EnergyPriceLoader
 import org.energy.pricing.services.NumberService
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -174,9 +162,12 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Load energy prices once at startup (suspend; heavy work off main thread)
+            LaunchedEffect(Unit) { EnergyPriceLoader.loadIfNeeded() }
+
             // Top bar with tabs
             var selectedTab by remember { mutableStateOf(0) }
-            val tabs = listOf("Power import", "Power export")
+            val tabs = listOf("Power import", "Power export", "Energy prices")
             TabRow(selectedTabIndex = selectedTab, containerColor = Color(0xFFE7F2FF)) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -190,6 +181,7 @@ fun App() {
             when (selectedTab) {
                 0 -> PowerImportScreen()
                 1 -> PowerExportScreen()
+                2 -> EnergyPricesScreen()
                 else -> PowerImportScreen()
             }
         }

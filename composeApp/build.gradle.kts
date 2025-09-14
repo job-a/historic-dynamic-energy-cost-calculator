@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
@@ -19,6 +18,11 @@ kotlin {
     }
     
     sourceSets {
+        val commonMain by getting
+        val jvmMain by getting {
+            // Ensure common resources are available on the JVM runtime classpath
+            resources.srcDir("src/commonMain/resources")
+        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -29,6 +33,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
