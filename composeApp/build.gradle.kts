@@ -23,6 +23,10 @@ kotlin {
             // Ensure common resources are available on the JVM runtime classpath
             resources.srcDir("src/commonMain/resources")
         }
+        val wasmJsMain by getting {
+            // Make common resources available to the Web (Wasm) target as static assets
+            resources.srcDir("src/commonMain/resources")
+        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
