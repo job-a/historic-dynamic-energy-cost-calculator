@@ -58,13 +58,13 @@ internal fun EnergyPricesScreen() {
         Divider()
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("date_time", modifier = Modifier.weight(1f))
-            Text("price_in_cents_per_kwh", modifier = Modifier.weight(1f))
+            Text("price_in_milli_cents_per_kwh", modifier = Modifier.weight(1f))
         }
         val pageItems = EnergyPriceInMemoryStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
-                Text(formatCents(r.price_in_cents_per_kwh), modifier = Modifier.weight(1f))
+                Text(formatMilliCents(r.price_in_milli_cents_per_kwh), modifier = Modifier.weight(1f))
             }
         }
         Divider()
@@ -86,11 +86,11 @@ internal fun EnergyPricesScreen() {
     }
 }
 
-private fun formatCents(cents: Int): String {
-    val negative = cents < 0
-    val abs = kotlin.math.abs(cents)
-    val euros = abs / 100
-    val rem = abs % 100
-    val s = euros.toString() + "." + rem.toString().padStart(2, '0')
+private fun formatMilliCents(milliCents: Int): String {
+    val negative = milliCents < 0
+    val abs = kotlin.math.abs(milliCents)
+    val euros = abs / 100_000
+    val rem = abs % 100_000
+    val s = euros.toString() + "." + rem.toString().padStart(5, '0')
     return if (negative) "-$s" else s
 }

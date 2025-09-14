@@ -4,10 +4,10 @@ import androidx.compose.runtime.mutableStateListOf
 
 // Record representing an hourly energy price
 // date_time: ISO-8601 instant string (UTC)
-// price_in_cents_per_kwh: price per kWh expressed in cents (integer)
+// price_in_milli_cents_per_kwh: price per kWh expressed in thousandths of a cent (integer)
 data class EnergyPriceRecord(
     val date_time: String,
-    val price_in_cents_per_kwh: Int,
+    val price_in_milli_cents_per_kwh: Int,
 )
 
 object EnergyPriceInMemoryStore {
