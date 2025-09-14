@@ -7,7 +7,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.ExperimentalComposeUiApi
 import org.energy.pricing.data.InMemoryExportStore
 import org.energy.pricing.data.InMemoryStore
 import org.energy.pricing.io.parseCsvForImport
@@ -17,6 +20,7 @@ import org.energy.pricing.services.EnergyPriceLoader
 import org.energy.pricing.services.NumberService
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun PowerImportScreen() {
     // Pagination state
@@ -66,7 +70,15 @@ private fun PowerImportScreen() {
         // Show current page rows (30 per page)
         val pageItems = InMemoryStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            var hovered by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (hovered) Color(0xFFE8F4FF) else Color.Transparent)
+                    .onPointerEvent(PointerEventType.Enter) { hovered = true }
+                    .onPointerEvent(PointerEventType.Exit) { hovered = false },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.power_importMilli), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.actual_usageMilli), modifier = Modifier.weight(1f))
@@ -87,6 +99,7 @@ private fun PowerImportScreen() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun PowerExportScreen() {
     var currentPage by remember { mutableStateOf(0) }
@@ -131,7 +144,15 @@ private fun PowerExportScreen() {
         }
         val pageItems = InMemoryExportStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            var hovered by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (hovered) Color(0xFFE8F4FF) else Color.Transparent)
+                    .onPointerEvent(PointerEventType.Enter) { hovered = true }
+                    .onPointerEvent(PointerEventType.Exit) { hovered = false },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.power_importMilli), modifier = Modifier.weight(1f))
                 Text(NumberService.formatKwh(r.actual_usageMilli), modifier = Modifier.weight(1f))

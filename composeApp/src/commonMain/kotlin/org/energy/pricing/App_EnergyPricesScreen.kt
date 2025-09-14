@@ -1,5 +1,6 @@
 package org.energy.pricing
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.ExperimentalComposeUiApi
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -23,6 +28,7 @@ import org.energy.pricing.data.EnergyPriceInMemoryStore
 import org.energy.pricing.services.DateTimeService
 import org.energy.pricing.services.EnergyPriceLoader
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun EnergyPricesScreen() {
     var currentPage = remember { mutableStateOf(0) }
@@ -87,7 +93,15 @@ internal fun EnergyPricesScreen() {
         }
         val pageItems = EnergyPriceInMemoryStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            var hovered = remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (hovered.value) Color(0xFFE8F4FF) else Color.Transparent)
+                    .onPointerEvent(PointerEventType.Enter) { hovered.value = true }
+                    .onPointerEvent(PointerEventType.Exit) { hovered.value = false },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
                 Text(formatMilliCents(r.price_in_milli_cents_per_kwh), modifier = Modifier.weight(1f))
             }
