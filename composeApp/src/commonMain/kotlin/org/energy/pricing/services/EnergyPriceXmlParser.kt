@@ -63,11 +63,17 @@ object EnergyPriceXmlParser {
                     startInstant.plus((position - 1).hours)
                 } catch (e: Exception) { continue }
                 val priceKwhEur = priceMwh / 1000.0
-                val milliCentsPerKwh = (priceKwhEur * 100_000.0).roundToInt()
+                // Convert EUR/kWh to milli-cents (thousandths of a cent) per kWh
+                val baseMilliCentsPerKwh = (priceKwhEur * 100_000.0).roundToInt()
+                // Apply requested adjustments in milli-cents:
+                // 1) add 10.154 cents -> 10_154 milli-cents
+                // 2) multiply by 1.21
+                // 3) add 2 cents -> 2_000 milli-cents
+                val adjustedMilliCentsPerKwh = (((baseMilliCentsPerKwh + 10_154) * 1.21).roundToInt() + 2_000)
                 results.add(
                     EnergyPriceRecord(
                         date_time = hourInstant.toString(),
-                        price_in_milli_cents_per_kwh = milliCentsPerKwh,
+                        price_in_milli_cents_per_kwh = adjustedMilliCentsPerKwh,
                     )
                 )
             }
