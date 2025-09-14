@@ -58,13 +58,13 @@ internal fun EnergyPricesScreen() {
         Divider()
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("date_time", modifier = Modifier.weight(1f))
-            Text("price_in_kwh", modifier = Modifier.weight(1f))
+            Text("price_in_cents_per_kwh", modifier = Modifier.weight(1f))
         }
         val pageItems = EnergyPriceInMemoryStore.records.subList(startIndex, endIndexExclusive)
         for (r in pageItems) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(DateTimeService.formatDutchDateTime(r.date_time), modifier = Modifier.weight(1f))
-                Text(formatPrice(r.price_in_kwh), modifier = Modifier.weight(1f))
+                Text(formatCents(r.price_in_cents_per_kwh), modifier = Modifier.weight(1f))
             }
         }
         Divider()
@@ -86,12 +86,11 @@ internal fun EnergyPricesScreen() {
     }
 }
 
-private fun formatPrice(value: Double): String {
-    // Show up to 4 decimals without relying on platform-specific formatting APIs
-    val scaled = kotlin.math.round(value * 10_000.0) / 10_000.0
-    // Ensure a dot as decimal separator
-    val s = scaled.toString()
-    // Optionally pad to 4 decimals for consistent look
-    val idx = s.indexOf('.')
-    return if (idx == -1) s + ".0000" else (s + "0000").substring(0, idx + 1 + 4)
+private fun formatCents(cents: Int): String {
+    val negative = cents < 0
+    val abs = kotlin.math.abs(cents)
+    val euros = abs / 100
+    val rem = abs % 100
+    val s = euros.toString() + "." + rem.toString().padStart(2, '0')
+    return if (negative) "-$s" else s
 }

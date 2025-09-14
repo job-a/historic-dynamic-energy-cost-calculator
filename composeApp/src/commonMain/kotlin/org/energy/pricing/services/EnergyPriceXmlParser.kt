@@ -8,11 +8,13 @@ import org.energy.pricing.data.EnergyPriceRecord
  * It looks for Period blocks, extracts the timeInterval start/end
  * and the list of Point/position/price.amount within each Period.
  * For each point, we compute the hour start time as start + (position-1) hours and convert price MWh -> kWh.
+ * Then we convert EUR/kWh to cents per kWh (rounded to nearest cent).
  *
  * Notes:
  * - Tags may be namespace-qualified (e.g., ns0:Period). We match with an optional prefix.
  * - price.amount contains a dot in the tag name; we escape it in regex so it is treated literally.
  */
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 
@@ -60,8 +62,14 @@ object EnergyPriceXmlParser {
                 val hourInstant = try {
                     startInstant.plus((position - 1).hours)
                 } catch (e: Exception) { continue }
-                val priceKwh = priceMwh / 1000.0
-                results.add(EnergyPriceRecord(date_time = hourInstant.toString(), price_in_kwh = priceKwh))
+                val priceKwhEur = priceMwh / 1000.0
+                val centsPerKwh = (priceKwhEur * 100.0).roundToInt()
+                results.add(
+                    EnergyPriceRecord(
+                        date_time = hourInstant.toString(),
+                        price_in_cents_per_kwh = centsPerKwh,
+                    )
+                )
             }
         }
         // Sort results by date_time to have deterministic order
