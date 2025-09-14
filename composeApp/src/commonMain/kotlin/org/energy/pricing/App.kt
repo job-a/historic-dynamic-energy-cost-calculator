@@ -10,9 +10,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.ExperimentalComposeUiApi
 import org.energy.pricing.data.InMemoryExportStore
 import org.energy.pricing.data.InMemoryImportStore
+import org.energy.pricing.data.EnergyPriceInMemoryStore
 import org.energy.pricing.io.parseCsvForImport
 import org.energy.pricing.io.pickCsvFileContent
 import org.energy.pricing.services.DateTimeService
@@ -202,7 +204,7 @@ fun App() {
 
             // Top bar with tabs
             var selectedTab by remember { mutableStateOf(0) }
-            val tabs = listOf("Power import", "Power export", "Energy prices")
+            val tabs = listOf("Power import", "Power export", "Energy prices", "Historic dynamic energy price calculation")
             TabRow(selectedTabIndex = selectedTab, containerColor = Color(0xFFE7F2FF)) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -217,8 +219,54 @@ fun App() {
                 0 -> PowerImportScreen()
                 1 -> PowerExportScreen()
                 2 -> EnergyPricesScreen()
+                3 -> HistoricDynamicPriceScreen()
                 else -> PowerImportScreen()
             }
         }
     }
+}
+@Composable
+private fun HistoricDynamicPriceScreen() {
+    // Build quick lookup maps
+    val priceByInstant = remember(EnergyPriceInMemoryStore.records.size) {
+        EnergyPriceInMemoryStore.records.associate { it.date_time to it.price_in_milli_cents_per_kwh }
+    }
+    val importTotalMicroCents = remember(InMemoryImportStore.records.size, EnergyPriceInMemoryStore.records.size) {
+        calcTotalMicroCents(InMemoryImportStore.records.mapNotNull { r ->
+            val usage = r.actual_usageMilli ?: return@mapNotNull null
+            val price = priceByInstant[r.date_time] ?: return@mapNotNull null
+            1L * usage * price
+        })
+    }
+    val exportTotalMicroCents = remember(InMemoryExportStore.records.size, EnergyPriceInMemoryStore.records.size) {
+        calcTotalMicroCents(InMemoryExportStore.records.mapNotNull { r ->
+            val usage = r.actual_usageMilli ?: return@mapNotNull null
+            val price = priceByInstant[r.date_time] ?: return@mapNotNull null
+            1L * usage * price
+        })
+    }
+
+    Column(horizontalAlignment = Alignment.Start) {
+        Text("Historic dynamic energy price calculation", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Text("Calculated import price: " + formatEuroFromMicroCents(importTotalMicroCents))
+        Text("Calculated export price: " + formatEuroFromMicroCents(exportTotalMicroCents))
+    }
+}
+
+private fun calcTotalMicroCents(items: List<Long>): Long {
+    var sum = 0L
+    for (v in items) sum += v
+    return sum
+}
+
+private fun formatEuroFromMicroCents(totalMicroCents: Long): String {
+    // Convert micro-cents to rounded cents, then to euro string
+    val negative = totalMicroCents < 0
+    val abs = kotlin.math.abs(totalMicroCents)
+    val centsRounded = (abs + 500_000L) / 1_000_000L // round to nearest cent
+    val euros = centsRounded / 100
+    val cents = (centsRounded % 100).toInt()
+    val str = euros.toString() + "." + cents.toString().padStart(2, '0')
+    return (if (negative) "-" else "") + "€" + str
 }
