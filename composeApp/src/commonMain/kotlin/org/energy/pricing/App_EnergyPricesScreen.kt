@@ -73,7 +73,7 @@ internal fun EnergyPricesScreen() {
                 Text("Previous")
             }
             Text(
-                "Page ${'$'}{currentPage.value + 1} of ${'$'}totalPages  (showing ${'$'}{startIndex + 1}–${'$'}endIndexExclusive of ${'$'}count)",
+                "Page ${currentPage.value + 1} of $totalPages  (showing ${startIndex + 1}–$endIndexExclusive of $count)",
                 modifier = Modifier.weight(1f)
             )
             Button(

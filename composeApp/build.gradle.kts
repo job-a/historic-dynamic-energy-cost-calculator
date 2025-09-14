@@ -45,6 +45,10 @@ kotlin {
     }
 }
 
+// Disable wasm JS browser tests to avoid requiring Chrome/Headless locally
+tasks.matching { it.name == "wasmJsBrowserTest" }.configureEach {
+    enabled = false
+}
 
 compose.desktop {
     application {
