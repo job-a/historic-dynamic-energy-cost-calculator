@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.energy.pricing.data.ImportRecord
+import org.energy.pricing.services.amsterdamTimeZone
 
 // Helper: parse a decimal string with up to 3 fractional digits into milli-units (Int)
 private fun parseDecimalToMilli(s: String): Int? {
@@ -50,7 +51,7 @@ private fun normalizeToInstantString(input: String): String? {
         val minute = m.groupValues[5].toInt()
         try {
             val ldt = LocalDateTime(year, month, day, hour, minute)
-            return ldt.toInstant(TimeZone.of("Europe/Amsterdam")).toString()
+            return ldt.toInstant(amsterdamTimeZone()).toString()
         } catch (_: Exception) {}
     }
     return null

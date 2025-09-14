@@ -27,6 +27,7 @@ import kotlinx.datetime.toInstant
 import org.energy.pricing.data.EnergyPriceInMemoryStore
 import org.energy.pricing.services.DateTimeService
 import org.energy.pricing.services.EnergyPriceLoader
+import org.energy.pricing.services.amsterdamTimeZone
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -159,7 +160,7 @@ private fun normalizeToInstantString(input: String): String? {
     val minute = m.groupValues[5].toInt()
     return try {
         val ldt = LocalDateTime(year, month, day, hour, minute)
-        ldt.toInstant(TimeZone.of("Europe/Amsterdam")).toString()
+        ldt.toInstant(amsterdamTimeZone()).toString()
     } catch (_: Exception) {
         null
     }

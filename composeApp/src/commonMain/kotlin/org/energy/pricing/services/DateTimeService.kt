@@ -11,7 +11,7 @@ import kotlinx.datetime.toLocalDateTime
  * Currently provides Dutch (Europe/Amsterdam) formatting.
  */
 object DateTimeService {
-    private val amsterdamTz = TimeZone.of("Europe/Amsterdam")
+    private val amsterdamTz = amsterdamTimeZone()
 
     /**
      * Formats an ISO-8601 date-time string to Dutch notation "dd-MM-yyyy HH:mm" in Europe/Amsterdam time zone.
