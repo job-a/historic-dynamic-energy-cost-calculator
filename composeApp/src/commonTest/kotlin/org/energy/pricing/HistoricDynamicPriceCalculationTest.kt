@@ -2,15 +2,17 @@ package org.energy.pricing
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import org.energy.pricing.data.InMemoryImportStore
 import org.energy.pricing.data.EnergyPriceInMemoryStore
-import org.energy.pricing.data.EnergyPriceRecord
 import org.energy.pricing.io.parseCsvForImport
+import org.energy.pricing.services.EnergyPriceXmlParser
+import org.energy.pricing.services.listEntsoeNlXmlContents
 
 class HistoricDynamicPriceCalculationTest {
 
     @Test
-    fun calculated_import_price_is_0_05_for_given_csv() {
+    fun calculated_import_price_uses_prices_from_resources() {
         // Arrange: clear stores
         InMemoryImportStore.clear()
         EnergyPriceInMemoryStore.clear()
@@ -25,17 +27,10 @@ class HistoricDynamicPriceCalculationTest {
         val parsed = parseCsvForImport(csv)
         InMemoryImportStore.addAll(parsed)
 
-        // Provide the energy price for 2024-09-04T15:00:00Z such that total rounds to €0.05
-        // Usage between 15:00 and 16:00 is 0.158 kWh -> 158 milli-kWh
-        // Choose price 31,646 milli-cents/kWh so 158 * 31,646 = 5,000,068 micro-cents ≈ €0.05
-        EnergyPriceInMemoryStore.addAll(
-            listOf(
-                EnergyPriceRecord(
-                    date_time = "2024-09-04T15:00:00Z",
-                    price_in_milli_cents_per_kwh = 31_646
-                )
-            )
-        )
+        // Load energy prices from XML resources just like the application
+        val files = listEntsoeNlXmlContents()
+        val parsedPrices = files.flatMap { (_, text) -> EnergyPriceXmlParser.parseAll(text) }
+        EnergyPriceInMemoryStore.addAll(parsedPrices)
 
         // Act: compute the total micro-cents as the HistoricDynamicPriceScreen does
         val priceByInstant = EnergyPriceInMemoryStore.records.associate { it.date_time to it.price_in_milli_cents_per_kwh }
@@ -44,12 +39,16 @@ class HistoricDynamicPriceCalculationTest {
             val price = priceByInstant[r.date_time] ?: return@mapNotNull null
             1L * usage * price
         }.sum()
-
-        // Convert to a display string "€0.05" using the same rounding as the app
         val display = formatEuroFromMicroCentsForTest(totalMicroCents)
 
-        // Assert: the historic dynamic page would show €0.05 for calculated import price
-        assertEquals("€0.05", display)
+        // Compute expected from the specific hour's price to ensure we truly used resource prices
+        val hourPrice = priceByInstant["2024-09-04T15:00:00Z"]
+        assertNotNull(hourPrice, "Expected to find a price for 2024-09-04T15:00:00Z in XML resources")
+        val expectedMicroCents = 1L * 158 /* milli-kWh */ * hourPrice
+        val expectedDisplay = formatEuroFromMicroCentsForTest(expectedMicroCents)
+
+        // Assert: calculated value equals the one derived from resource prices
+        assertEquals(expectedDisplay, display)
     }
 
     // Local copy of the app's formatting logic (private in App.kt), kept in test to avoid production changes
